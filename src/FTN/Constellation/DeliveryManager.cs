@@ -28,6 +28,10 @@ namespace FTN.Constellation
                     waitTask.Wait();
                     result = waitTask.Result;
                 }
+                else
+                {
+                    result = true;
+                }
             }
 
             return result;
@@ -45,15 +49,9 @@ namespace FTN.Constellation
 
                 try
                 {
-                    if (wait)
-                    {
-                        HttpResponseMessage hrm = await hc.PostAsync(uri, sc);
-                        hrm.EnsureSuccessStatusCode();
-                    }
-                    else
-                    {
-                        HttpResponseMessage hrm = await hc.PostAsync(uri, sc);
-                    }
+                    HttpResponseMessage hrm = await hc.PostAsync(uri, sc);
+                    hrm.EnsureSuccessStatusCode();
+                    result = true;
                 }
                 catch (Exception ex)
                 {

@@ -57,7 +57,7 @@ namespace FTN.Constellation.Test
             DeliveryRule dr = Router.IsMatch(m);
 
             Assert.IsNotNull(dr);
-            Assert.AreEqual("valid-test-delivery-1", dr.Name);            
+            Assert.AreEqual("valid-test-delivery-1", dr.Name);
         }
 
 
@@ -66,13 +66,31 @@ namespace FTN.Constellation.Test
         {
             string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
             Router.LoadRules(rules);
+
             ReceiveServer.Start();
-            
+
             Message m = new Message();
             m.Type = "valid-test-1";
 
-            Assert.IsTrue(Router.Deliver(m, true));
+            bool deliveryValue = Router.Deliver(m, true);
+
+            Assert.IsTrue(deliveryValue);
         }
-        
+
+        [Test]
+        public void TestRouterNoRule()
+        {
+            string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
+            Router.LoadRules(rules);
+
+            ReceiveServer.Start();
+
+            Message m = new Message();
+            m.Type = "unknown-rule";
+
+            bool deliveryValue = Router.Deliver(m, true);
+
+            Assert.IsFalse(deliveryValue);
+        }
     }
 }
