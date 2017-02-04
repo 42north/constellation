@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace FTN.Constellation
 {
@@ -10,10 +11,15 @@ namespace FTN.Constellation
         public Guid UUid;
         [JsonPropertyAttribute(PropertyName = "v")]
         public int Version;
+
+        [JsonPropertyAttribute(PropertyName = "p")]
+        public Guid ProcessUUid;
+
         [JsonPropertyAttribute(PropertyName = "t")]
         public string Type;
         [JsonPropertyAttribute(PropertyName = "a")]
         public List<string> Attributes;
+        [JsonConverterAttribute(typeof(ExpandoObjectConverter))]
         [JsonPropertyAttribute(PropertyName = "o")]
         public dynamic Payload;
         [JsonPropertyAttribute(PropertyName = "op")]
@@ -33,6 +39,43 @@ namespace FTN.Constellation
             Attributes = new List<string>();
             Operations = new List<string>();
             LastModified = DateTime.UtcNow;
+            //register the message with the constellation libarary.
+        }
+
+        public Message(object payload) : this()
+        {
+            Type = payload.GetType().FullName;
+            Payload = payload;
+        }
+
+        public Message(string type, object payload) : this()
+        {
+            Type = type;
+            Payload = payload;
+        }
+
+        public Message(Guid processGuid, string type, object payload) : this()
+        {
+            Type = type;
+            Payload = payload;
+        }
+
+        public string FindAttribute(string attribute)
+        {
+            return this.Attributes.Find(x => x.Contains(attribute));
+        }
+
+
+        public string GetAttributeValue(string key)
+        {
+            string[] s = FindAttribute(key).Split('=');
+            
+            string v = null;
+
+            if (s.Length == 2)
+                v = s[1];
+
+            return v;
         }
     }
 }

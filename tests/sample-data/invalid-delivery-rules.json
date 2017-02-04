@@ -1,0 +1,22 @@
+[
+    {
+        "name": "valid-test-delivery-1",
+        "enabled": true,
+        "version": "1",
+        "targetEndpoints": [
+            "http://localhost/ftn/constellation/receive"
+        ],
+        "typeExpression": "",
+        "attributeExpression": ""
+    },
+    {
+        "name": "valid-test-delivery-2",
+        "enabled": true,
+        "version": "1",
+        "targetEndpoints": [
+            "http://localhost/ftn/constellation/receive"
+        ],
+        "typeExpression": "aa",
+        "attributeExpression": ""
+    }
+]

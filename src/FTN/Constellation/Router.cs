@@ -16,11 +16,6 @@ namespace FTN.Constellation.Routing
         {
             get
             {
-                if (rules == null)
-                {
-                    rules = new List<DeliveryRule>();
-                }
-
                 return rules;
             }
         }
@@ -41,10 +36,10 @@ namespace FTN.Constellation.Routing
 
         private Router()
         {
-
+            rules = new List<DeliveryRule>();
         }
 
-        public int LoadRules(string ruleJSON)
+        public static int LoadRules(string ruleJSON)
         {
             List<DeliveryRule> localRules = JsonConvert.DeserializeObject<List<DeliveryRule>>(ruleJSON);
 
@@ -53,21 +48,21 @@ namespace FTN.Constellation.Routing
                 rule.Initialize();
             });
 
-            rules = localRules;
+            Router.Instance.rules = localRules;
 
-            return rules.Count;
+            return Router.Instance.rules.Count;
         }
 
-        public bool Deliver(Message msg)
+        public static bool Deliver(Message msg, bool wait)
         {
             bool result = false; 
 
-            DeliveryRule dr = IsMatch(msg);
+            DeliveryRule dr = Router.IsMatch(msg);
                         
             if (dr == null)
                 return false;
             
-            result = DeliveryManager.Deliver(msg, dr);
+            result = DeliveryManager.Deliver(msg, dr, wait);
 
             if (result)
             {
@@ -90,9 +85,9 @@ namespace FTN.Constellation.Routing
         }
 
         //Handles inspection of the Rules 
-        public DeliveryRule IsMatch(Message msg)
+        public static DeliveryRule IsMatch(Message msg)
         {
-            DeliveryRule rule = rules.Find((r) => 
+            DeliveryRule rule = Router.Instance.rules.Find((r) => 
             {
                 return r.IsMatch(msg);
             });
@@ -100,10 +95,8 @@ namespace FTN.Constellation.Routing
             if (rule != null)
             {
                 //matched incremement
-
             } else {
                 //unmatched incremement
-
             }
 
             return rule;
