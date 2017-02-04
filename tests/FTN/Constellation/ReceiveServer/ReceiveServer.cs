@@ -6,12 +6,13 @@ using Serilog;
 
 namespace FTN.Constellation.Test
 {
-
     public class ReceiveServer
     {
-        public static void Start()
+        public static dynamic host;
+        public static bool IsRunning = false;
+        public static dynamic Start()
         {
-            var host = new WebHostBuilder()
+            dynamic host = new WebHostBuilder()
             .UseUrls("http://localhost:23897")
             .UseKestrel(options =>
             {
@@ -20,7 +21,10 @@ namespace FTN.Constellation.Test
             })
             .UseStartup<Startup>()
             .Build();
+
             host.Start();
+
+            return host;
         }
     }
 

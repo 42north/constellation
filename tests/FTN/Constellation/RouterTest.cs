@@ -67,12 +67,14 @@ namespace FTN.Constellation.Test
             string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
             Router.LoadRules(rules);
 
-            ReceiveServer.Start();
+            dynamic server = ReceiveServer.Start();
 
             Message m = new Message();
             m.Type = "valid-test-1";
 
             bool deliveryValue = Router.Deliver(m, true);
+
+            server.Dispose();
 
             Assert.IsTrue(deliveryValue);
         }
@@ -83,12 +85,14 @@ namespace FTN.Constellation.Test
             string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
             Router.LoadRules(rules);
 
-            ReceiveServer.Start();
+            dynamic server = ReceiveServer.Start();
 
             Message m = new Message();
             m.Type = "unknown-rule";
 
             bool deliveryValue = Router.Deliver(m, true);
+
+            server.Dispose();
 
             Assert.IsFalse(deliveryValue);
         }
