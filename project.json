@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0-*",
+  "testRunner": "nunit",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": false
+  },
+  "dependencies": {
+   "Microsoft.AspNetCore.Server.Kestrel": "1.0.1",
+    "Microsoft.AspNetCore.Server.Kestrel.Https": "1.0.0",
+    "Microsoft.AspNetCore.Mvc": "1.0.*",
+    "Microsoft.Framework.Configuration.EnvironmentVariables": "1.0.0-beta8",
+    "Serilog": "2.0.0",
+    "Serilog.Extensions.Logging": "1.2.0",
+    "Serilog.Sinks.Literate": "2.0.0-rc-26",
+    "Serilog.Sinks.File": "2.0.0-rc-706",
+    "NUnit": "3.4.1",
+    "dotnet-test-nunit": "3.4.0-beta-2",
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      },
+      "imports": "dnxcore50"
+    }
+  }
+}

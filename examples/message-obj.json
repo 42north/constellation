@@ -1,0 +1,16 @@
+{
+    "u": "123e4567-e89b-12d3-a456-426655440000",
+    "v": 0,
+    "t":"constellation-log",
+    "a":["attr1=none","confidence=.1"],
+    "o": { 
+        "message": "An exception occured in xyz.",
+        "timestamp": "2016-11-02T14:56.721"
+    },
+    "op": [
+        
+    ],
+    "s": "2016-14-11T12:00:00.000Z",
+    "m": "2016-14-11T12:00:00.000Z",
+    "h": ""
+}
