@@ -99,6 +99,9 @@ namespace FTN.Constellation.Routing
                 //unmatched incremement
             }
 
+            if (!rule.Enabled)
+                rule = null;
+
             return rule;
         }
     }
