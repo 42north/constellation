@@ -99,7 +99,7 @@ namespace FTN.Constellation.Routing
                 //unmatched incremement
             }
 
-            if (!rule.Enabled)
+            if (rule != null && !rule.Enabled)
                 rule = null;
 
             return rule;
