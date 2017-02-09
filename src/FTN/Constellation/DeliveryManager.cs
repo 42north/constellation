@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace FTN.Constellation
 
             foreach (Uri uri in dr.TargetEndpoints)
             {
-                Task<bool> waitTask = AttemptDelivery(message, uri, wait);
+                Task<bool> waitTask = AttemptDeliveryAsync(message, uri);
 
                 if (wait)
                 {
@@ -37,7 +38,23 @@ namespace FTN.Constellation
             return result;
         }
 
-        public static async Task<bool> AttemptDelivery(string msg, Uri uri, bool wait)
+        public static async Task<bool[]> DeliverAsync(Message msg, DeliveryRule dr)
+        {
+            string message = JsonConvert.SerializeObject(msg);
+
+            List<Task<bool>> deliveries = new List<Task<bool>>();
+
+            foreach (Uri uri in dr.TargetEndpoints)
+            {
+                deliveries.Add(AttemptDeliveryAsync(message, uri));
+            }
+
+            //bool[] results = await Task.WhenAll(deliveries);
+
+            return await Task.WhenAll(deliveries);
+        }
+
+        public static async Task<bool> AttemptDeliveryAsync(string msg, Uri uri)
         {
             bool result = false;
             using (HttpClient hc = new HttpClient())
@@ -52,6 +69,7 @@ namespace FTN.Constellation
                     HttpResponseMessage hrm = await hc.PostAsync(uri, sc);
                     hrm.EnsureSuccessStatusCode();
                     result = true;
+                    hrm.Dispose();
                 }
                 catch (Exception ex)
                 {

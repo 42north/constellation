@@ -55,23 +55,35 @@ namespace FTN.Constellation.Routing
 
         public static bool Deliver(Message msg, bool wait)
         {
-            bool result = false; 
+            bool result = false;
 
             DeliveryRule dr = Router.IsMatch(msg);
-                        
+
             if (dr == null)
                 return false;
-            
+
             result = DeliveryManager.Deliver(msg, dr, wait);
 
             if (result)
             {
                 //increase count success count
-            } else {
+            }
+            else
+            {
                 //decrease success count
             }
 
             return result;
+        }
+
+        public static async Task<bool[]> DeliverAsync(Message msg)
+        {
+            DeliveryRule dr = Router.IsMatch(msg);
+
+            if (dr == null)
+                return null;
+
+            return await DeliveryManager.DeliverAsync(msg, dr);
         }
 
         public void MessageDeliveryFailure()
@@ -81,13 +93,13 @@ namespace FTN.Constellation.Routing
 
         public void MessageDeliverySuccess()
         {
-            
+
         }
 
         //Handles inspection of the Rules 
         public static DeliveryRule IsMatch(Message msg)
         {
-            DeliveryRule rule = Router.Instance.rules.Find((r) => 
+            DeliveryRule rule = Router.Instance.rules.Find((r) =>
             {
                 return r.IsMatch(msg);
             });
@@ -95,7 +107,9 @@ namespace FTN.Constellation.Routing
             if (rule != null)
             {
                 //matched incremement
-            } else {
+            }
+            else
+            {
                 //unmatched incremement
             }
 
