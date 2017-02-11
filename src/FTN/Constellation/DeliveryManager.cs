@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Serilog;
@@ -13,7 +14,20 @@ namespace FTN.Constellation
     ///</summary>
     public class DeliveryManager
     {
-        public static TimeSpan Timeout = new TimeSpan(0, 0, 10, 0);
+        private static HttpClient hc = null;
+        public static TimeSpan Timeout = new TimeSpan(0, 0, 2, 0);
+        private static DeliveryManager instance = new DeliveryManager();
+
+        public static DeliveryManager Instance
+        {
+            get { return instance; }
+        }
+
+        private DeliveryManager()
+        {
+            hc = new HttpClient();
+            hc.Timeout = Timeout;
+        }
 
         public async static Task<bool> Deliver(Message msg, DeliveryRule dr, bool wait)
         {
@@ -57,21 +71,17 @@ namespace FTN.Constellation
 
             try
             {
-                using (HttpClient hc = new HttpClient())
+                StringContent sc = new StringContent(msg);
+                sc.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+                using (HttpResponseMessage hrm = await DeliveryManager.hc.PostAsync(uri, sc))
                 {
-                    hc.Timeout = DeliveryManager.Timeout;
-
-                    StringContent sc = new StringContent(msg);
-                    sc.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-
-                    HttpResponseMessage hrm = await hc.PostAsync(uri, sc);
                     hrm.EnsureSuccessStatusCode();
                     result = true;
                     hrm.Dispose();
-
-                    sc.Dispose();
-                    hc.Dispose();
                 }
+
+                sc.Dispose();
             }
             catch (Exception ex)
             {
