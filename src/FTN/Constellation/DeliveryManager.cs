@@ -15,7 +15,7 @@ namespace FTN.Constellation
     {
         public static TimeSpan Timeout = new TimeSpan(0, 0, 10, 0);
 
-        public static bool Deliver(Message msg, DeliveryRule dr, bool wait)
+        public async static Task<bool> Deliver(Message msg, DeliveryRule dr, bool wait)
         {
             string message = JsonConvert.SerializeObject(msg);
             bool result = false;
@@ -26,8 +26,7 @@ namespace FTN.Constellation
 
                 if (wait)
                 {
-                    waitTask.Wait();
-                    result = waitTask.Result;
+                    result = await waitTask;
                 }
                 else
                 {
@@ -49,35 +48,34 @@ namespace FTN.Constellation
                 deliveries.Add(AttemptDeliveryAsync(message, uri));
             }
 
-            //bool[] results = await Task.WhenAll(deliveries);
-
             return await Task.WhenAll(deliveries);
         }
 
         public static async Task<bool> AttemptDeliveryAsync(string msg, Uri uri)
         {
             bool result = false;
-            using (HttpClient hc = new HttpClient())
+
+            try
             {
-                hc.Timeout = DeliveryManager.Timeout;
-
-                StringContent sc = new StringContent(msg);
-                sc.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-
-                try
+                using (HttpClient hc = new HttpClient())
                 {
+                    hc.Timeout = DeliveryManager.Timeout;
+
+                    StringContent sc = new StringContent(msg);
+                    sc.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
                     HttpResponseMessage hrm = await hc.PostAsync(uri, sc);
                     hrm.EnsureSuccessStatusCode();
                     result = true;
                     hrm.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(string.Format("Unable to deliver message to {0}. Exception {1}", uri, ex));
-                }
 
-                sc.Dispose();
-                hc.Dispose();
+                    sc.Dispose();
+                    hc.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(string.Format("Unable to deliver message to {0}. Exception {1}", uri, ex));
             }
 
             return result;

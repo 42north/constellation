@@ -62,16 +62,7 @@ namespace FTN.Constellation.Routing
             if (dr == null)
                 return false;
 
-            result = DeliveryManager.Deliver(msg, dr, wait);
-
-            if (result)
-            {
-                //increase count success count
-            }
-            else
-            {
-                //decrease success count
-            }
+            result = DeliveryManager.Deliver(msg, dr, wait).Result;
 
             return result;
         }
@@ -103,15 +94,6 @@ namespace FTN.Constellation.Routing
             {
                 return r.IsMatch(msg);
             });
-
-            if (rule != null)
-            {
-                //matched incremement
-            }
-            else
-            {
-                //unmatched incremement
-            }
 
             if (rule != null && !rule.Enabled)
                 rule = null;

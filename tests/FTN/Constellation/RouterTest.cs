@@ -80,6 +80,24 @@ namespace FTN.Constellation.Test
         }
 
         [Test]
+        public void TestRouterAsync()
+        {
+            string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
+            Router.LoadRules(rules);
+
+            dynamic server = ReceiveServer.Start();
+
+            Message m = new Message();
+            m.Type = "valid-test-1";
+
+            Router.DeliverAsync(m).Wait();
+
+            server.Dispose();
+
+            //Assert.IsTrue(deliveryValue);
+        }
+
+        [Test]
         public void TestRouterNoRule()
         {
             string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
