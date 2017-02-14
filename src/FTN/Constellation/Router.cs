@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FTN.Constellation;
 using Newtonsoft.Json;
@@ -9,6 +10,8 @@ namespace FTN.Constellation.Routing
 {
     public class Router
     {
+        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(4, 4);
+
         public RouterStatistics Statistics { get; set; }
 
         List<DeliveryRule> rules;
@@ -55,26 +58,32 @@ namespace FTN.Constellation.Routing
 
         public static bool Deliver(Message msg, bool wait)
         {
-            bool result = false;
-
             DeliveryRule dr = Router.IsMatch(msg);
 
             if (dr == null)
                 return false;
 
-            result = DeliveryManager.Deliver(msg, dr, wait).Result;
-
-            return result;
+            return DeliveryManager.Deliver(msg, dr, wait).Result;
         }
 
-        public static async Task<bool[]> DeliverAsync(Message msg)
+        public static async Task<dynamic> DeliverAsync(Message msg)
         {
             DeliveryRule dr = Router.IsMatch(msg);
 
-            if (dr == null)
-                return null;
+            try
+            {
+                Router.Instance.deliverySemaphore.Wait();
 
-            return await DeliveryManager.DeliverAsync(msg, dr);
+                return DeliveryManager.DeliverAsync(msg, dr).ContinueWith((result) =>
+                {
+                    Router.Instance.deliverySemaphore.Release();
+                });
+            }
+            catch (Exception ex)
+            {
+                Router.Instance.deliverySemaphore.Release();
+                throw ex;
+            }
         }
 
         public void MessageDeliveryFailure()

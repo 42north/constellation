@@ -15,7 +15,7 @@ namespace FTN.Constellation
     public class DeliveryManager
     {
         private static HttpClient hc = null;
-        public static TimeSpan Timeout = new TimeSpan(0, 0, 2, 0);
+        public static TimeSpan Timeout = new TimeSpan(0, 0, 10, 0);
         private static DeliveryManager instance = new DeliveryManager();
 
         public static DeliveryManager Instance
@@ -38,14 +38,8 @@ namespace FTN.Constellation
             {
                 Task<bool> waitTask = AttemptDeliveryAsync(message, uri);
 
-                if (wait)
-                {
-                    result = await waitTask;
-                }
-                else
-                {
-                    result = true;
-                }
+                result = await waitTask;
+
             }
 
             return result;
