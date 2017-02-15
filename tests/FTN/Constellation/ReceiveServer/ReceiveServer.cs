@@ -39,6 +39,7 @@ namespace FTN.Constellation.Test
             svc.AddLogging();
             svc.AddMvc();
             Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Warning()
             .WriteTo.LiterateConsole(outputTemplate: 
                 "{Timestamp:dd-MM-yyyy HH:mm:ss.fff} [{Level}] {Message}{NewLine}{Exception}")
             .CreateLogger();

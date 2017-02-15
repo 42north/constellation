@@ -79,6 +79,25 @@ namespace FTN.Constellation.Test
             Assert.IsTrue(deliveryValue);
         }
 
+                [Test]
+        public void TestRouterLarge()
+        {
+            string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
+            Router.LoadRules(rules);
+
+            dynamic server = ReceiveServer.Start();
+
+            Message m = new Message();
+            m.Type = "valid-test-1";
+
+            for (int i = 0; i < 100000; i++)
+            {
+                Router.DeliverAsync(m);
+            }
+
+            server.Dispose();
+        }
+
         [Test]
         public void TestRouterAsync()
         {

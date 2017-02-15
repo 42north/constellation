@@ -12,8 +12,6 @@ namespace FTN.Constellation.Test
         [RouteAttribute("receive")]
         public IActionResult Receive(Message message)
         {
-            Console.WriteLine(message.UUid);
-
             dynamic response = new ExpandoObject();
             response.status = "ok";
 
