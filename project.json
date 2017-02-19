@@ -11,10 +11,10 @@
     "Microsoft.AspNetCore.Mvc": "1.1.1",
     "Microsoft.Framework.Configuration.EnvironmentVariables": "1.0.0-beta8",
     "Microsoft.DotNet.InternalAbstractions": "1.0.0",
-    "Serilog": "2.0.0",
+    "Serilog": "2.4.0",
     "Serilog.Extensions.Logging": "1.4.0",
-    "Serilog.Sinks.Literate": "2.0.0-rc-26",
-    "Serilog.Sinks.File": "2.0.0-rc-706",
+    "Serilog.Sinks.Literate": "2.1.0",
+    "Serilog.Sinks.File": "3.2.0",
     "NUnit": "3.6.0",
     "dotnet-test-nunit": "3.4.0-beta-3"
   },
