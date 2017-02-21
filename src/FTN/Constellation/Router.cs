@@ -46,7 +46,8 @@ namespace FTN.Constellation.Routing
         {
             rules = new List<DeliveryRule>();
 
-            queueProcessor = Task.Factory.StartNew(() => { 
+            queueProcessor = Task.Factory.StartNew(() =>
+            {
                 ProcessQueue();
             });
         }
@@ -81,7 +82,7 @@ namespace FTN.Constellation.Routing
 
             try
             {
-                Router.Instance.deliverySemaphore.Wait();
+                await Router.Instance.deliverySemaphore.WaitAsync();
 
                 return DeliveryManager.DeliverAsync(msg, dr).ContinueWith((result) =>
                 {
@@ -101,8 +102,8 @@ namespace FTN.Constellation.Routing
 
             //try
             //{
-                if (Router.Instance.processQueueSemaphore.CurrentCount < 2)
-                    Router.Instance.processQueueSemaphore.Release();
+            if (Router.Instance.processQueueSemaphore.CurrentCount < 2)
+                Router.Instance.processQueueSemaphore.Release();
             //}
             //catch (Exception ex)
             //{
@@ -116,6 +117,11 @@ namespace FTN.Constellation.Routing
             {
                 try
                 {
+                    if (MessageQueue.Count > 0)
+                    {
+                        Log.Verbose(string.Format("Queue contains {0} messages.", MessageQueue.Count));
+                    }
+
                     while (MessageQueue.Count > 0)
                     {
                         Message message = null;
@@ -133,8 +139,17 @@ namespace FTN.Constellation.Routing
                     Log.Error(string.Format("Queue process error {0}", ex));
                 }
 
-                await processQueueSemaphore.WaitAsync(10000);
-                Log.Verbose("Checking queue status");
+                bool result = await processQueueSemaphore.WaitAsync(60000);
+                
+                if (!result)
+                {
+                    Log.Verbose("Async wait timeout - checking for messages.");
+                    Log.Verbose(string.Format("Queue contains {0} messages. Queue should be empty.", MessageQueue.Count));
+                }
+                else
+                {
+                    Log.Verbose("Async release - checking for messages.");
+                }
             }
         }
 
