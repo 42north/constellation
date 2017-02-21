@@ -29,6 +29,16 @@ namespace FTN.Constellation
             hc.Timeout = Timeout;
         }
 
+        public void Run()
+        {
+            
+        }
+
+        public void Stop()
+        {
+
+        }
+
         public async static Task<bool> Deliver(Message msg, DeliveryRule dr, bool wait)
         {
             string message = JsonConvert.SerializeObject(msg);

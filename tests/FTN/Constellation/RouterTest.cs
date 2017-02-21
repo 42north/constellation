@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using FTN.Constellation.Routing;
@@ -97,6 +98,30 @@ namespace FTN.Constellation.Test
 
             server.Dispose();
         }
+
+        [Test]
+        public async Task TestRouterQueueLarge()
+        {
+            string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
+            Router.LoadRules(rules);
+
+            dynamic server = ReceiveServer.Start();
+
+            Message m = new Message();
+            m.Type = "valid-test-1";
+
+            for (int i = 0; i < 100000; i++)
+            {     
+                Router.QueueForDelivery(m);
+            }
+
+            while (Router.Instance.MessageQueue.Count > 0)
+                await Task.Delay(1000);
+
+            server.Dispose();
+
+            return;
+        }        
 
         [Test]
         public void TestRouterAsync()

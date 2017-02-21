@@ -1,16 +1,21 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FTN.Constellation;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace FTN.Constellation.Routing
 {
     public class Router
     {
-        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(4, 4);
+        private Task queueProcessor = null;
+        private SemaphoreSlim processQueueSemaphore = new SemaphoreSlim(1);
+        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(8, 8);
+        public ConcurrentQueue<Message> MessageQueue = new ConcurrentQueue<Message>();
 
         public RouterStatistics Statistics { get; set; }
 
@@ -40,6 +45,10 @@ namespace FTN.Constellation.Routing
         private Router()
         {
             rules = new List<DeliveryRule>();
+
+            queueProcessor = Task.Factory.StartNew(() => { 
+                ProcessQueue();
+            });
         }
 
         public static int LoadRules(string ruleJSON)
@@ -83,6 +92,49 @@ namespace FTN.Constellation.Routing
             {
                 Router.Instance.deliverySemaphore.Release();
                 throw ex;
+            }
+        }
+
+        public static void QueueForDelivery(Message message)
+        {
+            Router.Instance.MessageQueue.Enqueue(message);
+
+            //try
+            //{
+                if (Router.Instance.processQueueSemaphore.CurrentCount < 2)
+                    Router.Instance.processQueueSemaphore.Release();
+            //}
+            //catch (Exception ex)
+            //{
+            //    Log.Error(string.Format("Release error {0}", ex));
+            //}
+        }
+
+        public async void ProcessQueue()
+        {
+            while (true)
+            {
+                try
+                {
+                    while (MessageQueue.Count > 0)
+                    {
+                        Message message = null;
+
+                        MessageQueue.TryDequeue(out message);
+
+                        if (message != null)
+                        {
+                            await DeliverAsync(message);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(string.Format("Queue process error {0}", ex));
+                }
+
+                await processQueueSemaphore.WaitAsync(10000);
+                Log.Verbose("Checking queue status");
             }
         }
 
