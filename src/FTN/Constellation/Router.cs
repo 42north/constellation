@@ -111,6 +111,14 @@ namespace FTN.Constellation.Routing
             //}
         }
 
+        public static void QueueForDelivery(Message[] message)
+        {
+            for (int i = 0; i < message.Length; i++)
+                Router.Instance.MessageQueue.Enqueue(message[i]);
+
+            Router.Instance.processQueueSemaphore.Release();
+        }
+
         public async void ProcessQueue()
         {
             while (true)
@@ -135,7 +143,7 @@ namespace FTN.Constellation.Routing
                 }
 
                 bool result = await processQueueSemaphore.WaitAsync(60000);
-                
+
                 if (!result)
                 {
                     Log.Verbose("Async wait timeout - checking for messages.");
