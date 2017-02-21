@@ -102,7 +102,7 @@ namespace FTN.Constellation.Routing
 
             //try
             //{
-            if (Router.Instance.processQueueSemaphore.CurrentCount < 2)
+            if (Router.Instance.processQueueSemaphore.CurrentCount < 1)
                 Router.Instance.processQueueSemaphore.Release();
             //}
             //catch (Exception ex)
@@ -117,11 +117,6 @@ namespace FTN.Constellation.Routing
             {
                 try
                 {
-                    if (MessageQueue.Count > 0)
-                    {
-                        Log.Verbose(string.Format("Queue contains {0} messages.", MessageQueue.Count));
-                    }
-
                     while (MessageQueue.Count > 0)
                     {
                         Message message = null;
@@ -148,7 +143,7 @@ namespace FTN.Constellation.Routing
                 }
                 else
                 {
-                    Log.Verbose("Async release - checking for messages.");
+                    //Log.Verbose("Async release - checking for messages.");
                 }
             }
         }
