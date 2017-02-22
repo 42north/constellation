@@ -42,14 +42,11 @@ namespace FTN.Constellation
         public async static Task<bool> Deliver(Message msg, DeliveryRule dr, bool wait)
         {
             string message = JsonConvert.SerializeObject(msg);
-            bool result = false;
+            bool result = true;
 
             foreach (Uri uri in dr.TargetEndpoints)
             {
-                Task<bool> waitTask = AttemptDeliveryAsync(message, uri);
-
-                result = await waitTask;
-
+                result &= await AttemptDeliveryAsync(message, uri).ConfigureAwait(false);
             }
 
             return result;
@@ -66,7 +63,7 @@ namespace FTN.Constellation
                 deliveries.Add(AttemptDeliveryAsync(message, uri));
             }
 
-            return await Task.WhenAll(deliveries);
+            return await Task.WhenAll(deliveries).ConfigureAwait(false);
         }
 
         public static async Task<bool> AttemptDeliveryAsync(string msg, Uri uri)
@@ -78,7 +75,7 @@ namespace FTN.Constellation
                 StringContent sc = new StringContent(msg);
                 sc.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-                using (HttpResponseMessage hrm = await DeliveryManager.hc.PostAsync(uri, sc))
+                using (HttpResponseMessage hrm = await DeliveryManager.hc.PostAsync(uri, sc).ConfigureAwait(false))
                 {
                     hrm.EnsureSuccessStatusCode();
                     result = true;

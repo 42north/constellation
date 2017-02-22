@@ -100,15 +100,8 @@ namespace FTN.Constellation.Routing
         {
             Router.Instance.MessageQueue.Enqueue(message);
 
-            //try
-            //{
             if (Router.Instance.processQueueSemaphore.CurrentCount < 1)
                 Router.Instance.processQueueSemaphore.Release();
-            //}
-            //catch (Exception ex)
-            //{
-            //    Log.Error(string.Format("Release error {0}", ex));
-            //}
         }
 
         public static void QueueForDelivery(Message[] message)
