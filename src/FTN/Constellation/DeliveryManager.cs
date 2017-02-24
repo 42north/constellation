@@ -86,7 +86,7 @@ namespace FTN.Constellation
             }
             catch (Exception ex)
             {
-                Log.Error(string.Format("Unable to deliver message to {0}. Exception {1}", uri, ex));
+                Log.Error(string.Format("Unable to deliver message to {0}. Message {1} Exception {2}", uri, msg, ex));
             }
 
             return result;

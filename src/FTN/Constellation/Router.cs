@@ -112,6 +112,14 @@ namespace FTN.Constellation.Routing
             Router.Instance.processQueueSemaphore.Release();
         }
 
+        public static void QueueForDelivery(List<Message> message)
+        {
+            for (int i = 0; i < message.Count; i++)
+                Router.Instance.MessageQueue.Enqueue(message[i]);
+
+            Router.Instance.processQueueSemaphore.Release();
+        }        
+
         public async void ProcessQueue()
         {
             while (true)
