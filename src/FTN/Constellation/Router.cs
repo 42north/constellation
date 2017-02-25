@@ -14,7 +14,7 @@ namespace FTN.Constellation.Routing
     {
         private Thread queueProcessor = null;
         private SemaphoreSlim processQueueSemaphore = new SemaphoreSlim(1);
-        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(2, 2);
+        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(8, 8);
         public ConcurrentQueue<Message> MessageQueue = new ConcurrentQueue<Message>();
 
         public RouterStatistics Statistics { get; set; }
