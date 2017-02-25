@@ -12,9 +12,9 @@ namespace FTN.Constellation.Routing
 {
     public class Router
     {
-        private Task queueProcessor = null;
+        private Thread queueProcessor = null;
         private SemaphoreSlim processQueueSemaphore = new SemaphoreSlim(1);
-        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(8, 8);
+        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(2, 2);
         public ConcurrentQueue<Message> MessageQueue = new ConcurrentQueue<Message>();
 
         public RouterStatistics Statistics { get; set; }
@@ -46,10 +46,9 @@ namespace FTN.Constellation.Routing
         {
             rules = new List<DeliveryRule>();
 
-            queueProcessor = Task.Factory.StartNew(() =>
-            {
-                ProcessQueue();
-            });
+            ThreadStart ts = new ThreadStart(ProcessQueue);
+            queueProcessor = new Thread(ts);
+            queueProcessor.Start();
         }
 
         public static int LoadRules(string ruleJSON)
@@ -82,12 +81,11 @@ namespace FTN.Constellation.Routing
 
             try
             {
-                await Router.Instance.deliverySemaphore.WaitAsync();
-
+                await Router.Instance.deliverySemaphore.WaitAsync().ConfigureAwait(false);
                 return DeliveryManager.DeliverAsync(msg, dr).ContinueWith((result) =>
-                {
-                    Router.Instance.deliverySemaphore.Release();
-                });
+                                {
+                                    Router.Instance.deliverySemaphore.Release();
+                                });
             }
             catch (Exception ex)
             {
@@ -118,7 +116,7 @@ namespace FTN.Constellation.Routing
                 Router.Instance.MessageQueue.Enqueue(message[i]);
 
             Router.Instance.processQueueSemaphore.Release();
-        }        
+        }
 
         public async void ProcessQueue()
         {
@@ -134,7 +132,7 @@ namespace FTN.Constellation.Routing
 
                         if (message != null)
                         {
-                            await DeliverAsync(message);
+                            await DeliverAsync(message).ConfigureAwait(false);
                         }
                     }
                 }
