@@ -14,7 +14,7 @@ namespace FTN.Constellation.Routing
     {
         private Thread queueProcessor = null;
         private SemaphoreSlim processQueueSemaphore = new SemaphoreSlim(1);
-        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(8, 8);
+        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(2, 2);
         public ConcurrentQueue<Message> MessageQueue = new ConcurrentQueue<Message>();
 
         public RouterStatistics Statistics { get; set; }
@@ -82,10 +82,11 @@ namespace FTN.Constellation.Routing
             try
             {
                 await Router.Instance.deliverySemaphore.WaitAsync().ConfigureAwait(false);
+
                 return DeliveryManager.DeliverAsync(msg, dr).ContinueWith((result) =>
                                 {
                                     Router.Instance.deliverySemaphore.Release();
-                                });
+                                }).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

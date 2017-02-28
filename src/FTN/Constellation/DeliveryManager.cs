@@ -31,7 +31,7 @@ namespace FTN.Constellation
 
         public void Run()
         {
-            
+
         }
 
         public void Stop()
@@ -77,9 +77,11 @@ namespace FTN.Constellation
 
                 using (HttpResponseMessage hrm = await DeliveryManager.hc.PostAsync(uri, sc).ConfigureAwait(false))
                 {
-                    hrm.EnsureSuccessStatusCode();
-                    result = true;
-                    hrm.Dispose();
+                    if (hrm.IsSuccessStatusCode)
+                    {
+                        result = true;
+                        //hrm.Dispose();
+                    }
                 }
 
                 sc.Dispose();
