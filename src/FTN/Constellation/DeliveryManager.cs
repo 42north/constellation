@@ -80,7 +80,7 @@ namespace FTN.Constellation
                     if (hrm.IsSuccessStatusCode)
                     {
                         result = true;
-                        //hrm.Dispose();
+                        hrm.Dispose();
                     }
                 }
 
