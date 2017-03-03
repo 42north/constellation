@@ -14,7 +14,8 @@ namespace FTN.Constellation.Routing
     {
         private Thread queueProcessor = null;
         private SemaphoreSlim processQueueSemaphore = new SemaphoreSlim(1);
-        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(2, 2);
+        private ManualResetEventSlim goButton = new ManualResetEventSlim();
+        private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(16, 16);
         public ConcurrentQueue<Message> MessageQueue = new ConcurrentQueue<Message>();
 
         public RouterStatistics Statistics { get; set; }
@@ -99,8 +100,7 @@ namespace FTN.Constellation.Routing
         {
             Router.Instance.MessageQueue.Enqueue(message);
 
-            if (Router.Instance.processQueueSemaphore.CurrentCount < 1)
-                Router.Instance.processQueueSemaphore.Release();
+            Router.Instance.goButton.Set();
         }
 
         public static void QueueForDelivery(Message[] message)
@@ -108,7 +108,7 @@ namespace FTN.Constellation.Routing
             for (int i = 0; i < message.Length; i++)
                 Router.Instance.MessageQueue.Enqueue(message[i]);
 
-            Router.Instance.processQueueSemaphore.Release();
+            Router.Instance.goButton.Set();
         }
 
         public static void QueueForDelivery(List<Message> message)
@@ -116,42 +116,31 @@ namespace FTN.Constellation.Routing
             for (int i = 0; i < message.Count; i++)
                 Router.Instance.MessageQueue.Enqueue(message[i]);
 
-            Router.Instance.processQueueSemaphore.Release();
+            Router.Instance.goButton.Set();
         }
 
         public async void ProcessQueue()
         {
             while (true)
             {
-                try
-                {
-                    while (MessageQueue.Count > 0)
-                    {
-                        Message message = null;
+                goButton.Wait();
 
-                        MessageQueue.TryDequeue(out message);
-
-                        if (message != null)
-                        {
-                            await DeliverAsync(message).ConfigureAwait(false);
-                        }
-                    }
-                }
-                catch (Exception ex)
+                if (MessageQueue.IsEmpty)
                 {
-                    Log.Error(string.Format("Queue process error {0}", ex));
+                    goButton.Reset();
+                    Log.Verbose("Consetllation queue is empty. Reset and wait.");
+                    continue;
                 }
 
-                bool result = await processQueueSemaphore.WaitAsync(60000);
+                Message message = null;
+                MessageQueue.TryDequeue(out message);
 
-                if (!result)
+                if ((MessageQueue.Count % 100) == 0)
+                    Log.Verbose("Constellation queue level is: " + MessageQueue.Count);
+
+                if (message != null)
                 {
-                    Log.Verbose("Async wait timeout - checking for messages.");
-                    Log.Verbose(string.Format("Queue contains {0} messages. Queue should be empty.", MessageQueue.Count));
-                }
-                else
-                {
-                    //Log.Verbose("Async release - checking for messages.");
+                    await DeliverAsync(message).ConfigureAwait(false);
                 }
             }
         }
