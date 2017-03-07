@@ -12,7 +12,7 @@ namespace FTN.Constellation.Routing
 {
     public class Router
     {
-        private Thread queueProcessor = null;
+        private Task queueProcessor = null;
         private SemaphoreSlim processQueueSemaphore = new SemaphoreSlim(1);
         private ManualResetEventSlim goButton = new ManualResetEventSlim();
         private SemaphoreSlim deliverySemaphore = new SemaphoreSlim(16, 16);
@@ -47,9 +47,13 @@ namespace FTN.Constellation.Routing
         {
             rules = new List<DeliveryRule>();
 
-            ThreadStart ts = new ThreadStart(ProcessQueue);
-            queueProcessor = new Thread(ts);
-            queueProcessor.Start();
+            //ThreadStart ts = new ThreadStart(ProcessQueue);
+            //queueProcessor = new Thread(ts);
+            //queueProcessor.Start();
+
+            Task t = Task.Run(ProcessQueue);
+            t.ConfigureAwait(false);
+            queueProcessor = t;
         }
 
         public static int LoadRules(string ruleJSON)
@@ -119,7 +123,7 @@ namespace FTN.Constellation.Routing
             Router.Instance.goButton.Set();
         }
 
-        public async void ProcessQueue()
+        public async Task ProcessQueue()
         {
             while (true)
             {

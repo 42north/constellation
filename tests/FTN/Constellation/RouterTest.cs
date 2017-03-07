@@ -80,8 +80,8 @@ namespace FTN.Constellation.Test
             Assert.IsTrue(deliveryValue);
         }
 
-                [Test]
-        public void TestRouterLarge()
+        [Test]
+        public async Task TestRouterLarge()
         {
             string rules = File.ReadAllText("tests/sample-data/valid-delivery-rules.json");
             Router.LoadRules(rules);
@@ -91,12 +91,14 @@ namespace FTN.Constellation.Test
             Message m = new Message();
             m.Type = "valid-test-1";
 
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 10000; i++)
             {
-                Router.DeliverAsync(m);
+                await Router.DeliverAsync(m);
             }
 
             server.Dispose();
+
+            return;
         }
 
         [Test]
@@ -110,8 +112,8 @@ namespace FTN.Constellation.Test
             Message m = new Message();
             m.Type = "valid-test-1";
 
-            for (int i = 0; i < 100000; i++)
-            {     
+            for (int i = 0; i < 10000; i++)
+            {
                 Router.QueueForDelivery(m);
             }
 
@@ -121,7 +123,7 @@ namespace FTN.Constellation.Test
             server.Dispose();
 
             return;
-        }        
+        }
 
         [Test]
         public void TestRouterAsync()
@@ -134,11 +136,14 @@ namespace FTN.Constellation.Test
             Message m = new Message();
             m.Type = "valid-test-1";
 
-            Router.DeliverAsync(m).Wait();
-
-            server.Dispose();
-
-            //Assert.IsTrue(deliveryValue);
+            try
+            {
+                Router.DeliverAsync(m).Wait();
+            }
+            finally
+            {
+                server.Dispose();
+            }
         }
 
         [Test]
