@@ -1,34 +1,41 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace FTN.Constellation
 {
     public class Message
     {
-        [JsonProperty("u")]
+        [JsonPropertyName("u")]
         public Guid UUid;
-        [JsonPropertyAttribute(PropertyName = "v")]
+        
+        [JsonPropertyName("v")]
         public int Version;
 
-        [JsonPropertyAttribute(PropertyName = "p")]
+        [JsonPropertyName("p")]
         public Guid ProcessUUid;
 
-        [JsonPropertyAttribute(PropertyName = "t")]
+        [JsonPropertyName("t")]
         public string Type;
-        [JsonPropertyAttribute(PropertyName = "a")]
+
+        [JsonPropertyName("a")]
         public List<string> Attributes;
-        [JsonConverterAttribute(typeof(ExpandoObjectConverter))]
-        [JsonPropertyAttribute(PropertyName = "o")]
+
+        [JsonPropertyName("o")]
         public dynamic Payload;
-        [JsonPropertyAttribute(PropertyName = "op")]
+
+        [JsonPropertyName("op")]
         public List<string> Operations;
-        [JsonPropertyAttribute(PropertyName = "s")]
+
+        [JsonPropertyName("s")]
+
         public DateTime Timestamp;
-        [JsonPropertyAttribute(PropertyName = "m")]
+
+        [JsonPropertyName("m")]
         public DateTime LastModified;
-        [JsonPropertyAttribute(PropertyName = "h")]
+
+        [JsonPropertyName("h")]
         public string Hash;
 
         public Message()

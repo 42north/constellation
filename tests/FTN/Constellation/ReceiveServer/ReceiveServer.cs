@@ -14,11 +14,10 @@ namespace FTN.Constellation.Test
         {
             dynamic host = new WebHostBuilder()
             .UseUrls("http://localhost:23897")
-            .UseKestrel(options =>
-            {
-                options.NoDelay = true;
-                options.UseConnectionLogging();
-            })
+            // .UseKestrel(options =>
+            // {
+            //     options.UseConnectionLogging();
+            // })
             .UseStartup<Startup>()
             .Build();
 
@@ -37,7 +36,6 @@ namespace FTN.Constellation.Test
         public void ConfigureServices(IServiceCollection svc) 
         {
             svc.AddLogging();
-            svc.AddMvc();
             Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Warning()
             .WriteTo.LiterateConsole(outputTemplate: 
@@ -49,7 +47,6 @@ namespace FTN.Constellation.Test
             ILoggerFactory loggerFactory, IHostingEnvironment env) 
         {   
             loggerFactory.AddSerilog();
-            app.UseMvc();
         }
         
 
